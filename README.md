@@ -6,3 +6,6 @@
 1.集成前首先进行开发环境搭建，包括Qt、vs2017安装等环境配置;<br>
 2.下载VHYun_SDK_WIN项目，在VHYunDemo中打开VLive.sln进行编译;<br>
 3.编译成功之后,将VHYunSDK中的lib、bin目录下dll拷贝到应用vlive.exe同目录，即可运行。
+
+# 版本说明
+
