@@ -1,0 +1,155 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{D9D6E242-F8AF-46E4-B9FD-80ECBC20BA3E}</UniqueIdentifier>
+      <Extensions>qrc;*</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
+    <Filter Include="Form Files">
+      <UniqueIdentifier>{99349809-55BA-4b9d-BF79-8FDBB0286EB3}</UniqueIdentifier>
+      <Extensions>ui</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{D9D6E242-F8AF-46E4-B9FD-80ECBC20BA3E}</UniqueIdentifier>
+      <Extensions>qrc;*</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
+    <Filter Include="Generated Files">
+      <UniqueIdentifier>{71ED8ED8-ACB9-4CE9-BBE1-E00B30144E11}</UniqueIdentifier>
+      <Extensions>moc;h;cpp</Extensions>
+      <SourceControlFiles>False</SourceControlFiles>
+    </Filter>
+    <Filter Include="common">
+      <UniqueIdentifier>{984f3af2-5eaa-4f5d-9b43-e5421f4e26b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="common\baseclass">
+      <UniqueIdentifier>{f5a53877-8c1b-4f76-aed5-20108b9df2a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="common\def">
+      <UniqueIdentifier>{0534e5b5-8e4a-48c3-ba79-cc15031c7dce}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="VLive.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LoginWdg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="VLiveCustomEvent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LoadingWdg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\ToolButton.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\push_button.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\TitleWidget.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\baseclass\pathmanager.cpp">
+      <Filter>common\baseclass</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\ConfigSetting.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\ExceptionDump.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\baseclass\pathManage.cpp">
+      <Filter>common\baseclass</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\CRC32.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="VLive.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="VLiveCustomEvent.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="LoadingWdg.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="..\common\ToolButton.h">
+      <Filter>common</Filter>
+    </QtMoc>
+    <QtMoc Include="..\common\push_button.h">
+      <Filter>common</Filter>
+    </QtMoc>
+    <QtMoc Include="LoginWdg.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="..\common\TitleWidget.h">
+      <Filter>common</Filter>
+    </QtMoc>
+  </ItemGroup>
+  <ItemGroup>
+    <QtUic Include="VLive.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="LoginWdg.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="LoadingWdg.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+  </ItemGroup>
+  <ItemGroup>
+    <QtRcc Include="VLive.qrc">
+      <Filter>Resource Files</Filter>
+    </QtRcc>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\common\baseclass\pathmanager.h">
+      <Filter>common\baseclass</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\ConfigSetting.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\ExceptionDump.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\def\VH_ConstDeff.h">
+      <Filter>common\def</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\baseclass\pathManage.h">
+      <Filter>common\baseclass</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\CRC32.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="VLive.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="vlive.ico">
+      <Filter>Source Files</Filter>
+    </Image>
+  </ItemGroup>
+</Project>

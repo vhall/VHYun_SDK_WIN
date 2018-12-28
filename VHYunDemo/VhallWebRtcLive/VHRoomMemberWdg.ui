@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>VHRoomMemberWdg</class>
+ <widget class="QWidget" name="VHRoomMemberWdg">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>347</width>
+    <height>48</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>VHRoomMemberWdg</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true"/>
+  </property>
+  <layout class="QHBoxLayout" name="horizontalLayout">
+   <property name="spacing">
+    <number>4</number>
+   </property>
+   <property name="rightMargin">
+    <number>4</number>
+   </property>
+   <item>
+    <widget class="QLabel" name="label_user_id">
+     <property name="minimumSize">
+      <size>
+       <width>80</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>80</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: rgb(202, 202, 202);</string>
+     </property>
+     <property name="text">
+      <string>qiuyu123</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="label_status">
+     <property name="minimumSize">
+      <size>
+       <width>50</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>50</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: rgb(202, 202, 202);</string>
+     </property>
+     <property name="text">
+      <string>推流中</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="pushButton_invite">
+     <property name="minimumSize">
+      <size>
+       <width>60</width>
+       <height>30</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>60</width>
+       <height>30</height>
+      </size>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QPushButton#pushButton_invite{
+color: rgb(202, 202, 202);
+	background-color: rgb(106, 106, 106);
+	border-radius:4px;
+}
+
+QPushButton#pushButton_invite:hover{
+color: rgb(202, 202, 202);
+	background-color: rgb(141, 141, 141);
+	border-radius:4px;
+}</string>
+     </property>
+     <property name="text">
+      <string>邀请上麦</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="pushButton_StopActive">
+     <property name="minimumSize">
+      <size>
+       <width>30</width>
+       <height>30</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>30</width>
+       <height>30</height>
+      </size>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QPushButton#pushButton_StopActive{
+color: rgb(202, 202, 202);
+	background-color: rgb(106, 106, 106);
+	border-radius:4px;
+}
+
+QPushButton#pushButton_StopActive:hover{
+color: rgb(202, 202, 202);
+	background-color: rgb(141, 141, 141);
+	border-radius:4px;
+}</string>
+     </property>
+     <property name="text">
+      <string>下麦</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="pushButton_kickout">
+     <property name="minimumSize">
+      <size>
+       <width>30</width>
+       <height>30</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>30</width>
+       <height>30</height>
+      </size>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QPushButton#pushButton_kickout{
+color: rgb(202, 202, 202);
+	background-color: rgb(106, 106, 106);
+	border-radius:4px;
+}
+
+QPushButton#pushButton_kickout:hover{
+color: rgb(202, 202, 202);
+	background-color: rgb(141, 141, 141);
+	border-radius:4px;
+}</string>
+     </property>
+     <property name="text">
+      <string>踢出</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="pushButton_cancelKickOut">
+     <property name="minimumSize">
+      <size>
+       <width>60</width>
+       <height>30</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>60</width>
+       <height>30</height>
+      </size>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QPushButton#pushButton_cancelKickOut{
+color: rgb(202, 202, 202);
+	background-color: rgb(106, 106, 106);
+	border-radius:4px;
+}
+
+QPushButton#pushButton_cancelKickOut:hover{
+color: rgb(202, 202, 202);
+	background-color: rgb(141, 141, 141);
+	border-radius:4px;
+}</string>
+     </property>
+     <property name="text">
+      <string>取消踢出</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+  </layout>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections/>
+</ui>
