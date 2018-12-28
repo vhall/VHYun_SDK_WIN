@@ -1,2 +1,3 @@
 # VHYun_SDK_WIN
-微吼云Windows SDK致力于提供一套完整的音视频互动解决方案。其提供了账号登陆，实时音视频互动，桌面共享，文件插播等功能。<p>
+微吼云Windows SDK致力于提供一套完整的音视频互动解决方案。
+集成和调用方式，参见官方文档：http://yun.vhall.com/document/document/index 
