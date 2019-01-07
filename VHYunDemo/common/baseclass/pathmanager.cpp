@@ -3,6 +3,7 @@
 #include "ConfigSetting.h"
 #include <QDebug>
 #include <QJsonDocument>
+#include <QCoreApplication>
 #include <QDir> 
 
 CPathManager::CPathManager()
@@ -28,8 +29,12 @@ QString CPathManager::GetAppDataPath()
 QString CPathManager::GetConfigPath()
 {
 	QString strAppDataPath = GetAppDataPath() + QString::fromStdWString(CONFIGPATH);
-
 	return strAppDataPath;
+}
+
+QString CPathManager::GetToolConfigPath() {
+    QString strAppDataPath = GetAppDataPath() + QString::fromStdWString(VHALL_TOOL_CONFIG);
+    return strAppDataPath;
 }
 
 QString CPathManager::GetAudiodevicePath()
@@ -90,6 +95,36 @@ bool CPathManager::isDirExist(const QString& strPath)
 		bool ok = dir.mkpath(strPath);//创建多级目录
 		return ok;
 	}
+}
+
+QString CPathManager::GetLogoImagePath() {
+    QString logoImagePath = QCoreApplication::applicationDirPath() + "/login_logo.png";
+    QString path = logoImagePath.replace("\\","/");
+    return path;
+}
+
+QString CPathManager::GetSplashImagePath() {
+    QString logoImagePath = QCoreApplication::applicationDirPath() + "/splash.png";
+    QString path = logoImagePath.replace("\\", "/");
+    return path;
+}
+
+QString CPathManager::GetTitleLogoImagePath() {
+    QString logoImagePath = QCoreApplication::applicationDirPath() + "/vhallTitleLogo.png";
+    QString path = logoImagePath.replace("\\", "/");
+    return path;
+}
+
+QString CPathManager::GetVersionBackImagePath() {
+    QString logoImagePath = QCoreApplication::applicationDirPath() + "/versionBack.png";
+    QString path = logoImagePath.replace("\\", "/");
+    return path;
+}
+
+QString CPathManager::GetVhprocessbarbackImagePath() {
+    QString logoImagePath = QCoreApplication::applicationDirPath() + "/vhprocessbarback.png";
+    QString path = logoImagePath.replace("\\", "/");
+    return path;
 }
 
 QString CPathManager::GetNetIP(QString webCode)

@@ -282,7 +282,7 @@ void UploadCrashFile(wchar_t* wsFileName) {
    u_int32_t crcToken = crc32(szToken.toUtf8(), szToken.length());
 
    QString msConfPath = CPathManager::GetConfigPath();
-   QString dumpSerUrl = ConfigSetting::ReadString(msConfPath, GROUP_DEFAULT, DUMP_SERVER_URL, "http://helpdump.t.vhall.com/upload");
+   QString dumpSerUrl = ConfigSetting::ReadString(CPathManager::GetToolConfigPath(), GROUP_DEFAULT, DUMP_SERVER_URL, "http://helpdump.t.vhall.com/upload");
    QString qUrl = dumpSerUrl+QString("?streamID=%1&version=%2&filename=%3&crashTime=%4&MengZhu=0&token=%5")
       .arg(QString::fromStdString(gCurStreamID))
       .arg(QString::fromStdWString(gCurrentVersion))

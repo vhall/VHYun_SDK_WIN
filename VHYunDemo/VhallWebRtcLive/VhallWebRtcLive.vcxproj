@@ -260,7 +260,6 @@
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(SolutionDir)common;$(SolutionDir)VhallWebRtcLive\MemberList;$(SolutionDir)VhallWebRtcSDK\WebRTC;$(SolutionDir)common\baseclass;.\..\Interactive_live_SDK_win\vhall_webrtc_sdk;$(SolutionDir)VHPaasSDK;$(SolutionDir)InteractionSDK\InteractionSDK\InteractionSDK;$(SolutionDir)VhallPaasSDK;$(SolutionDir)VhallPaasSDK\VhallWebRtcSDK\WebRTC\include</IncludePath>
     </QtMoc>
     <ClInclude Include="..\common\def\VH_ConstDeff.h" />
-    <ClInclude Include="..\common\def\VH_Macro.h" />
     <ClInclude Include="..\common\message\Msg_MainUI.h" />
     <QtMoc Include="CScreenShareToolWgd.h">
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(SolutionDir)common;$(SolutionDir)common\baseclass;$(SolutionDir)VhallPaasSDK\include;$(SolutionDir)common\message;$(SolutionDir)common\def</IncludePath>

@@ -79,7 +79,8 @@ WebRtcLiveWdg::WebRtcLiveWdg(QWidget *parent) :
     connect(&mReSetMediaFileMainViewTimer, &QTimer::timeout, this, &WebRtcLiveWdg::slot_ReSetMediaFileMainViewTimer);
     connect(&mReSetDesktopMainViewTimer, &QTimer::timeout, this, &WebRtcLiveWdg::slot_ReSetDesktopMainViewTimer);
 
-	ui.widget_ctrl->InitBtnState(globalToolManager->GetDataManager()->GetPushStreamPermission());
+	Permission per = globalToolManager->GetPaasSDK()->GetPermission();
+	ui.widget_ctrl->InitBtnState(per.publish_inav_stream);
 
 	ui.listWidget_speaking->hide();
 	ui.widget_3->hide();
@@ -108,7 +109,7 @@ WebRtcLiveWdg::WebRtcLiveWdg(QWidget *parent) :
 	mpPlayerVolumn->HideSettingBtn();
 	connect(mpPlayerVolumn, &AudioSliderUI::sigVolumnChanged, this, &WebRtcLiveWdg::slot_PlayerVolumnChanged);
 
-	Permission per = globalToolManager->GetPaasSDK()->GetPermission();
+	//Permission per = globalToolManager->GetPaasSDK()->GetPermission();
 	//ui.widget_ctrl->initToSpeakBtnState(per.apply_inav_publish);//申请上麦
 	ui.widget_ctrl->ShowPublishInavAnother(per.publish_inav_another);//旁路直播
 	ui.widget_ctrl->intShowStartLive(per.publish_inav_stream);//推流 /上麦
@@ -128,7 +129,7 @@ WebRtcLiveWdg::WebRtcLiveWdg(QWidget *parent) :
     connect(ui.widget_mainView, &VhallRenderWdg::sig_ClickedMic, this, &WebRtcLiveWdg::slot_ClickedMic);
     connect(ui.widget_mainView, &VhallRenderWdg::sig_setInMainView, this, &WebRtcLiveWdg::slot_SetMainWdgRender);
 
-	globalToolManager->GetDataManager()->SetPushStreamPermission(per.publish_inav_stream);
+	//globalToolManager->GetDataManager()->SetPushStreamPermission(per.publish_inav_stream);
 
 	CreateScreenShareWgd();
 	CreateSettingDlg(false);
@@ -249,17 +250,16 @@ void WebRtcLiveWdg::HandleRecvApplyInavPublishMsg(QEvent* event)
         return;
     }
     QEventVHMember* member = (QEventVHMember*)event;
-    globalToolManager->GetDataManager()->WriteLog("%s user:%s", __FUNCTION__,member->thirdPartyUserId.c_str());
-    if (member->thirdPartyUserId != globalToolManager->GetDataManager()->GetThridPartyUserId().toStdString()) {
+    if (member->thirdPartyUserId != globalToolManager->GetDataManager()->GetThridPartyUserId()) {
     	Permission per = globalToolManager->GetPaasSDK()->GetPermission();
         if(per.audit_inav_publish)//审核//审核邀请上麦上麦
         {
             QEventVHMember* eventMsg = (QEventVHMember*)event;
             //有可能多个用户同时申请上麦，此时根据用户ID创建对应的显示窗口。
-            CBaseWnd *wnd = globalToolManager->GetWndManager()->FindWnd(WND_ID_ASK_FOR_SPEAK, QString::fromStdString(eventMsg->thirdPartyUserId));
+            CBaseWnd *wnd = globalToolManager->GetWndManager()->FindWnd(WND_ID_ASK_FOR_SPEAK,eventMsg->thirdPartyUserId);
             if (wnd) {
                 CSTDMapParam map;
-                map[USER_ID] = QString::fromStdString(eventMsg->thirdPartyUserId);
+                map[USER_ID] = eventMsg->thirdPartyUserId;
                 wnd->Notice(map);
                 wnd->show();
             }
@@ -271,7 +271,7 @@ void WebRtcLiveWdg::HandleRecvApplyInavPublishMsg(QEvent* event)
 void WebRtcLiveWdg::HandleRecvAuditInavPublishMsg(QEvent* event)
 {
     QEventVHMember* eventMsg = (QEventVHMember*)event;
-    if (globalToolManager->GetDataManager()->GetThridPartyUserId().compare(QString::fromStdString(eventMsg->thirdPartyUserId)) == 0) {
+    if (globalToolManager->GetDataManager()->GetThridPartyUserId().compare(eventMsg->thirdPartyUserId) == 0) {
         if (AuditPublish::AuditPublish_Accept == eventMsg->memberStatusType)//开始推流
         {
             globalToolManager->GetDataManager()->WriteLog("%s AuditPublish::AuditPublish_Accept", __FUNCTION__);
@@ -280,6 +280,7 @@ void WebRtcLiveWdg::HandleRecvAuditInavPublishMsg(QEvent* event)
             FadeOutTip(tips);
 			ui.widget_ctrl->OnStartLive(true);
 			ui.widget_ctrl->SetToSpeakBtnState(true);
+            globalToolManager->GetDataManager()->SetIsLiving(true);
         }
         else//拒绝上麦
         { 
@@ -305,13 +306,6 @@ void WebRtcLiveWdg::RemoveDesktopStreamMsg(const QString& uid)
     QMutexLocker l(&mStreamMutexCS);
 	ui.DesktopWdg->hide();
 	SetPlayDeskTopAndMediaFileState(false);
-	
-    //if (mDesktopWdg) {
-    //    ui.verticalLayout_desktopAndMedia->removeWidget(mDesktopWdg);
-    //    delete mDesktopWdg;
-    //    mDesktopWdg = NULL;
-    //    
-    //}
 }
 
 void WebRtcLiveWdg::RemoveLocalStreamMsg(const QString& uid) {
@@ -321,11 +315,6 @@ void WebRtcLiveWdg::RemoveLocalStreamMsg(const QString& uid) {
     if (uid.compare(globalToolManager->GetDataManager()->GetThridPartyUserId()) != 0)
     {
 		mRenderMap.remove(uid);
-   //     QMap<QString, VhallRenderWdg*>::iterator iter = mRenderMap.find(uid);
-   //     if (iter != mRenderMap.end()) {
-   //         //mRenderMap.erase(iter);
-			//mRenderMap.remove(iter.key());
-   //     }
 
         int iCount = ui.listWidget_topView->count();
         globalToolManager->GetDataManager()->WriteLog("%s  iCount：%d reMoveInfoId:%s\n", __FUNCTION__, iCount, uid.toLatin1().data());
@@ -361,17 +350,6 @@ void WebRtcLiveWdg::RemoveLocalStreamMsg(const QString& uid) {
 
 			QStringList strIdList = mRenderMap.keys();
 			QString curPushingStreamUser = strIdList.at(0);
-            //int iCount = ui.listWidget_topView->count();
-            //for (int i = iCount - 1; i >= 0; i--) {
-            //    QListWidgetItem *item = ui.listWidget_topView->item(i);
-            //    if (NULL != item) {
-            //        QWidget *w = ui.listWidget_topView->itemWidget(item);
-            //        if (NULL != w) {
-            //            VhallRenderWdg *itemWidget = dynamic_cast<VhallRenderWdg *>(w);
-            //            curPushingStreamUser = itemWidget->GetUserID();
-            //        }
-            //    }
-            //}
 
             if (!curPushingStreamUser.isEmpty()) {
                 if (globalToolManager->GetPaasSDK()->IsCapturingStream(VHStreamType_Desktop)
@@ -388,25 +366,13 @@ void WebRtcLiveWdg::RemoveLocalStreamMsg(const QString& uid) {
                 }
             }
         }
-		else if(bValue && 2==iCount && mCurMainShowUid.compare(globalToolManager->GetDataManager()->GetThridPartyUserId())==0)
+		else if(bValue && 2==iCount && mCurMainShowUid.compare(globalToolManager->GetDataManager()->GetThridPartyUserId())==0 &&
+			!globalToolManager->GetPaasSDK()->IsCapturingStream(VHStreamType_MediaFile))
 		{
 			ui.widget_topRenderView->hide();
 		}
     }
 
-	//int iCount = ui.listWidget_topView->count();
-	//if (iCount==1)
-	//{
-	//	QListWidgetItem *item = ui.listWidget_topView->item(0);
-	//	if (NULL != item) {
-	//		QWidget *w = ui.listWidget_topView->itemWidget(item);
-	//		if (NULL != w) {
-	//			VhallRenderWdg *itemWidget = dynamic_cast<VhallRenderWdg *>(w);
-	//			if(!itemWidget->isActiveWindow())
-	//				ui.widget_topRenderView->hide();//隐藏
-	//		}
-	//	}
-	//}
 }
 
 void WebRtcLiveWdg::HandleUserOnLine(QEvent* event) {
@@ -414,11 +380,11 @@ void WebRtcLiveWdg::HandleUserOnLine(QEvent* event) {
     if (member) {
         if (member->memberStatusType == 1) {
             //上线
-            AddMemeberIntoOnLineList(QString::fromStdString(member->thirdPartyUserId), MemberStatus_Watching);
+            AddMemeberIntoOnLineList(member->thirdPartyUserId, MemberStatus_Watching);
         }
         else {
             //下线
-            RemoveMemberFromOnLineUser(QString::fromStdString(member->thirdPartyUserId));
+            RemoveMemberFromOnLineUser(member->thirdPartyUserId);
         }
     }
 }
@@ -433,19 +399,19 @@ void WebRtcLiveWdg::HandleStreamRemoved(QEvent* event)
     QEventStream* eventMsg = (QEventStream*)event;
     if (eventMsg)
     {
-        globalToolManager->GetDataManager()->WriteLog("%s user stream remove uid:%s\n", __FUNCTION__, eventMsg->strUser.c_str());
+        globalToolManager->GetDataManager()->WriteLog("%s user stream remove uid:%s\n", __FUNCTION__, eventMsg->strUser.toStdString().c_str());
 
         if (eventMsg->mStreamType <= VHStreamType_AVCapture)
         {
-            RemoveLocalStreamMsg(QString::fromStdString(eventMsg->strUser));
+            RemoveLocalStreamMsg(eventMsg->strUser);
         }
         else if (eventMsg->mStreamType == VHStreamType_MediaFile)
         {
-            RemoveMediaFileStreamMsg(QString::fromStdString(eventMsg->strUser));
+            RemoveMediaFileStreamMsg(eventMsg->strUser);
         }
         else if (eventMsg->mStreamType == VHStreamType_Desktop)
         {
-            RemoveDesktopStreamMsg(QString::fromStdString(eventMsg->strUser));
+            RemoveDesktopStreamMsg(eventMsg->strUser);
         }
 
     }
@@ -507,18 +473,18 @@ void WebRtcLiveWdg::HandleRecvAskForInav(QEvent* event) {
     globalToolManager->GetDataManager()->WriteLog("%s HandleRecvAskForInav", __FUNCTION__);
     QEventVHMember* eventMsg = (QEventVHMember*)event;
     //如果自己收到了邀请上麦消息则弹窗提示框。
-    if (globalToolManager->GetDataManager()->GetThridPartyUserId().compare(QString::fromStdString(eventMsg->thirdPartyUserId)) == 0) {
+    if (globalToolManager->GetDataManager()->GetThridPartyUserId().compare(eventMsg->thirdPartyUserId) == 0) {
         QEventVHMember* eventMsg = (QEventVHMember*)event;
         //有可能主持人同时邀请，此时根据用户ID创建对应的显示窗口。
-        CBaseWnd *wnd = globalToolManager->GetWndManager()->FindWnd(WND_ID_INVITE_TO_SPEAK, QString::fromStdString(eventMsg->thirdPartyUserId));
+        CBaseWnd *wnd = globalToolManager->GetWndManager()->FindWnd(WND_ID_INVITE_TO_SPEAK, eventMsg->thirdPartyUserId);
         if (wnd) {
             CSTDMapParam map;
-            map[USER_ID] = QString::fromStdString(eventMsg->thirdPartyUserId);
+            map[USER_ID] = eventMsg->thirdPartyUserId;
             wnd->Notice(map);
             wnd->show();
         }
     }
-    VHRoomMemberWdg* member = GetRoomMemberFromOnLineList(QString::fromStdString(eventMsg->thirdPartyUserId));
+    VHRoomMemberWdg* member = GetRoomMemberFromOnLineList(eventMsg->thirdPartyUserId);
     if (member) {
         member->SetUserStatus(MemberStatus_BeInvited);
     }
@@ -699,7 +665,7 @@ void WebRtcLiveWdg::customEvent(QEvent *event) {
 		}
 		//m_SelfStopPush = false;
 		QEventPublishStream* msgEvent = (QEventPublishStream*)event;
-		if (0 == QString::fromStdString(msgEvent->strStream).compare(globalToolManager->GetDataManager()->GetThridPartyUserId()) 
+		if (0 == msgEvent->strStream.compare(globalToolManager->GetDataManager()->GetThridPartyUserId()) 
 			/*&& !m_SelfStopPush*/)//被动下麦
 		{
 			ui.widget_ctrl->OnStartLive(false);
@@ -756,6 +722,25 @@ void WebRtcLiveWdg::HandleInitVhallSDK() {
     ui.widget_ctrl->OnStartLive(true);
 	if (m_pScreenShareToolWgd)
 		m_pScreenShareToolWgd->SetStartLive(true);
+}
+
+void WebRtcLiveWdg::RecvRemoteMediaStream() {
+    if (mbIsDeskTop)//桌面共享中
+    {
+        mbEnableStopDesktopStream = false;
+        mbIsDeskTop = false;
+        if (m_pScreenShareToolWgd) {
+            m_pScreenShareToolWgd->hide();
+        }
+        show();
+    }
+
+    m_qCycleTimer.stop();
+    //隐藏UI
+    ShowVedioPlayWidget(FALSE);
+    ForceHide(true);
+    m_bPlayCurrentFile = true;
+    StopShowMediaVideo();
 }
 
 void WebRtcLiveWdg::HandleWebRtcRoomConnetSuc() {
@@ -999,7 +984,8 @@ void WebRtcLiveWdg::slot_BtnScreenClicked() {
 		return;
 	}
 
-    if (!globalToolManager->GetDataManager()->GetPushStreamPermission()) {
+	Permission per = globalToolManager->GetPaasSDK()->GetPermission();
+    if (!per.publish_inav_stream) {
         FadeOutTip(QString::fromWCharArray(L"无推流权限不能进行桌面共享"));
         return;
     }
@@ -1136,14 +1122,15 @@ void WebRtcLiveWdg::slot_BtnStreamClicked() {
         HandleStartLiving();
     }
     else {
-		ui.widget_ctrl->EnableStartLive(false);
-		if (m_pScreenShareToolWgd)
-		{
-			m_pScreenShareToolWgd->EnableStartLive(false);
-		}
-
 		mbStopLive = true;
-		stopPushStream();
+        if (!globalToolManager->GetPaasSDK()->IsCapturingStream(VHStreamType_AVCapture) &&
+            !globalToolManager->GetPaasSDK()->IsCapturingStream(VHStreamType_Desktop) &&
+            !globalToolManager->GetPaasSDK()->IsCapturingStream(VHStreamType_MediaFile)) {
+            globalToolManager->GetPaasSDK()->UserPublishCallback(PushStreamEvent::PushStreamEvent_Lower);
+        }
+        else {
+            stopPushStream();
+        }
     }
     globalToolManager->GetDataManager()->WriteLog("Leave Function:%s \n", __FUNCTION__);
 }
@@ -1230,7 +1217,8 @@ void WebRtcLiveWdg::slot_OnPlayFileClicked() {
 			return;
 		}
 
-		if (!globalToolManager->GetDataManager()->GetPushStreamPermission()) {
+		Permission per = globalToolManager->GetPaasSDK()->GetPermission();
+		if (!per.publish_inav_stream) {
 			FadeOutTip(QString::fromWCharArray(L"无推流权限不能进行文件插播"));
 			return;
 		}
@@ -1362,7 +1350,8 @@ void WebRtcLiveWdg::CreatePlayMediaFileUI()
 
 bool WebRtcLiveWdg::IsEnalbePlayMedia()
 {
-    bool bref = globalToolManager->GetDataManager()->GetPushStreamPermission();
+	Permission per = globalToolManager->GetPaasSDK()->GetPermission();
+    bool bref = per.publish_inav_stream;
     return bref;
 }
 
@@ -1686,7 +1675,10 @@ void WebRtcLiveWdg::HandleDeviceEvent(QEvent* event) {
         globalToolManager->GetPaasSDK()->SetUseCameraGuid(devEvent->cameraDevId.toStdString());
 
         globalToolManager->GetPaasSDK()->SetUserPlayIndex(devEvent->playerIndex);
-		globalToolManager->GetPaasSDK()->StartLocalCapture((VideoProfileIndex)devEvent->cameraIndex);
+		int nRet = globalToolManager->GetPaasSDK()->StartLocalCapture((VideoProfileIndex)devEvent->cameraIndex);
+        if (nRet != 0) {
+            FadeOutTip(QStringLiteral("音视频设备无法正常打开，请检测设备是否已连接"));
+        }
 
     }
 }
@@ -1697,7 +1689,7 @@ void WebRtcLiveWdg::HandleGetVHMemberList(QEvent* event) {
     }
     QEventVHMember* member = dynamic_cast<QEventVHMember*>(event);
     if (member) {
-        AddMemeberIntoOnLineList(QString::fromStdString(member->thirdPartyUserId), member->memberStatusType);
+        AddMemeberIntoOnLineList(member->thirdPartyUserId, member->memberStatusType);
     }
 	else
 	{
@@ -1711,15 +1703,15 @@ void  WebRtcLiveWdg::HandleUserPublishCallback(QEvent* event) {
     }
 	QEventUserPublish* member = dynamic_cast<QEventUserPublish*>(event);
     if (member) {
-        VHRoomMemberWdg* memberOnLine = GetRoomMemberFromOnLineList(QString::fromStdString(member->thirdPartyUserId));
+        VHRoomMemberWdg* memberOnLine = GetRoomMemberFromOnLineList(member->thirdPartyUserId);
         if (memberOnLine) {
             memberOnLine->SetUserStatus(member->memberStatusType);
         }
 
-		QString objId = QString::fromStdString(member->thirdPartyUserId);
+		QString objId = member->thirdPartyUserId;
 		if (PushStreamEvent_Refused == member->memberStatusType)
 		{
-			FadeOutTip(QString::fromWCharArray(L"%1还没有准备好，暂时不能上麦").arg(member->thirdPartyUserId.c_str()));
+			FadeOutTip(QString::fromWCharArray(L"%1还没有准备好，暂时不能上麦").arg(member->thirdPartyUserId.toStdString().c_str()));
 		}
 		else if (objId.compare(globalToolManager->GetDataManager()->GetThridPartyUserId()) == 0)
 		{
@@ -1738,7 +1730,7 @@ void  WebRtcLiveWdg::HandleUserPublishCallback(QEvent* event) {
 			 //m_SelfStopPush = false;
 		}
 		
-		if (QString::fromStdString(member->thirdPartyUserId).compare(globalToolManager->GetDataManager()->GetThridPartyUserId()) == 0)
+		if (member->thirdPartyUserId.compare(globalToolManager->GetDataManager()->GetThridPartyUserId()) == 0)
 		{
 			VHRoomMemberWdg *widget = GetRoomMemberFromOnLineList(globalToolManager->GetDataManager()->GetThridPartyUserId());
 			if (nullptr != widget)
@@ -1763,10 +1755,10 @@ void  WebRtcLiveWdg::HandleRecvKickInvaMsg(QEvent* event) {
     }
     QEventPublishStream* member = dynamic_cast<QEventPublishStream*>(event);
     if (member) {
-        RemoveMemberFromOnLineUser(QString::fromStdString(member->strStream));
-        AddMemberIntoKickOutLineList(QString::fromStdString(member->strStream), MemberStatus_KickOut);
+        RemoveMemberFromOnLineUser(member->strStream);
+        AddMemberIntoKickOutLineList(member->strStream, MemberStatus_KickOut);
         //当被用户踢出时，退出互动房间。
-        if (member->strStream == globalToolManager->GetDataManager()->GetThridPartyUserId().toStdString()) {
+        if (member->strStream == globalToolManager->GetDataManager()->GetThridPartyUserId()) {
 			//结束推流
             globalToolManager->GetPaasSDK()->LeaveVHMediaRoom();
             globalToolManager->GetPaasSDK()->LogoutHVRoom();
@@ -1782,7 +1774,7 @@ void WebRtcLiveWdg::HandleGetKickOutMemberList(QEvent* event) {
     }
     QEventVHMember* member = dynamic_cast<QEventVHMember*>(event);
     if (member) {
-        AddMemberIntoKickOutLineList(QString::fromStdString(member->thirdPartyUserId), MemberStatus_KickOut);
+        AddMemberIntoKickOutLineList(member->thirdPartyUserId, MemberStatus_KickOut);
     }
 }
 
@@ -1966,34 +1958,34 @@ void WebRtcLiveWdg::HandleStartLiving() {
 
 void WebRtcLiveWdg::HandleAskforInavPublish(QEventRoomEvent* roomEvent, bool sucessed) {
     if (sucessed) {
-        VHRoomMemberWdg* member = GetRoomMemberFromOnLineList(QString::fromStdString(roomEvent->mUserId));
+        VHRoomMemberWdg* member = GetRoomMemberFromOnLineList(roomEvent->mUserId);
         if (member) {
             member->SetUserStatus(MemberStatus_BeInvited);
         }
     }
     else {
-        VHRoomMemberWdg* member = GetRoomMemberFromOnLineList(QString::fromStdString(roomEvent->mUserId));
+        VHRoomMemberWdg* member = GetRoomMemberFromOnLineList(roomEvent->mUserId);
         if (member) {
             member->EnableAllButton();
         }
-        QString tips = QStringLiteral("邀请") + QString::fromStdString(roomEvent->mUserId) + QStringLiteral("上麦失败：") + QString::fromStdString(roomEvent->mRespMsg);
+        QString tips = QStringLiteral("邀请") + roomEvent->mUserId + QStringLiteral("上麦失败：") + QString::fromStdString(roomEvent->mRespMsg);
         FadeOutTip(tips);
     }
 }
 
 void WebRtcLiveWdg::HandleKickInavStream(QEventRoomEvent* roomEvent, bool sucessed) {
     if (sucessed) {
-        VHRoomMemberWdg* member = GetRoomMemberFromOnLineList(QString::fromStdString(roomEvent->mUserId));
+        VHRoomMemberWdg* member = GetRoomMemberFromOnLineList(roomEvent->mUserId);
         if (member) {
             member->SetUserStatus(MemberStatus_Watching);
         }
     }
     else {
-        VHRoomMemberWdg* member = GetRoomMemberFromOnLineList(QString::fromStdString(roomEvent->mUserId));
+        VHRoomMemberWdg* member = GetRoomMemberFromOnLineList(roomEvent->mUserId);
         if (member) {
             member->EnableAllButton();
         }
-        QString tips = QStringLiteral("下麦") + QString::fromStdString(roomEvent->mUserId) + QStringLiteral("失败：") + QString::fromStdString(roomEvent->mRespMsg);
+        QString tips = QStringLiteral("下麦") + roomEvent->mUserId + QStringLiteral("失败：") + QString::fromStdString(roomEvent->mRespMsg);
         FadeOutTip(tips);
     }
 }
@@ -2001,21 +1993,21 @@ void WebRtcLiveWdg::HandleKickInavStream(QEventRoomEvent* roomEvent, bool sucess
 void WebRtcLiveWdg::HandleKickInva(QEventRoomEvent* roomEvent, bool sucessed) {
     if (sucessed) {
         if (roomEvent->mProcessType == KickStream_KickOutUser) {
-            RemoveMemberFromOnLineUser(QString::fromStdString(roomEvent->mUserId));
-            AddMemberIntoKickOutLineList(QString::fromStdString(roomEvent->mUserId), MemberStatus_KickOut);
+            RemoveMemberFromOnLineUser(roomEvent->mUserId);
+            AddMemberIntoKickOutLineList(roomEvent->mUserId, MemberStatus_KickOut);
         }
         else if (roomEvent->mProcessType == KickStream_CancelKickOutUser) {
-            RemoveMemberFromKickOutUser(QString::fromStdString(roomEvent->mUserId));
+            RemoveMemberFromKickOutUser(roomEvent->mUserId);
             // AddMemeberIntoOnLineList(QString::fromStdString(roomEvent->mUserId), MemberStatus_Watching);
         }
     }
     else {
         if (roomEvent->mProcessType == KickStream_KickOutUser) {
-            QString tips = QString::fromStdString(roomEvent->mUserId) + QStringLiteral(" 踢出互动房间失败：") + QString::fromStdString(roomEvent->mRespMsg);
+            QString tips = roomEvent->mUserId + QStringLiteral(" 踢出互动房间失败：") + QString::fromStdString(roomEvent->mRespMsg);
             FadeOutTip(tips);
         }
         else if (roomEvent->mProcessType == KickStream_CancelKickOutUser) {
-            QString tips = QString::fromStdString(roomEvent->mUserId) + QStringLiteral(" 取消踢出互动房间失败：") + QString::fromStdString(roomEvent->mRespMsg);
+            QString tips = roomEvent->mUserId + QStringLiteral(" 取消踢出互动房间失败：") + QString::fromStdString(roomEvent->mRespMsg);
             FadeOutTip(tips);
         }
     }
@@ -2023,7 +2015,7 @@ void WebRtcLiveWdg::HandleKickInva(QEventRoomEvent* roomEvent, bool sucessed) {
 
 void WebRtcLiveWdg::HandleAuditInavPublish(QEventRoomEvent* roomEvent, bool sucessed) {
     if (sucessed) {
-        VHRoomMemberWdg* member = GetRoomMemberFromOnLineList(QString::fromStdString(roomEvent->mUserId));
+        VHRoomMemberWdg* member = GetRoomMemberFromOnLineList(roomEvent->mUserId);
         if (member) {
             //发送同于上麦成功之后，设置当前用户状态为推流中。
             if (roomEvent->mProcessType == AuditPublish_Accept) {
@@ -2035,14 +2027,14 @@ void WebRtcLiveWdg::HandleAuditInavPublish(QEventRoomEvent* roomEvent, bool suce
         }
     }
     else {
-        VHRoomMemberWdg* member = GetRoomMemberFromOnLineList(QString::fromStdString(roomEvent->mUserId));
+        VHRoomMemberWdg* member = GetRoomMemberFromOnLineList(roomEvent->mUserId);
         if (member) {
             member->EnableAllButton();
         }
         if (member) {
             //发送同于上麦成功之后，设置当前用户状态为推流中。
             if (roomEvent->mProcessType == AuditPublish_Accept) {
-                QString tips = QStringLiteral("同意") + QString::fromStdString(roomEvent->mUserId) + QStringLiteral("失败：") + QString::fromStdString(roomEvent->mRespMsg);
+                QString tips = QStringLiteral("同意") + roomEvent->mUserId + QStringLiteral("失败：") + QString::fromStdString(roomEvent->mRespMsg);
                 FadeOutTip(tips);
             }
             else {
@@ -2198,19 +2190,19 @@ void WebRtcLiveWdg::HandleSubScribSucEvent(QEvent* eventMsg)
     if (event) {
         //mStreamMutexCS.Lock();
         QMutexLocker l(&mStreamMutexCS);
-        globalToolManager->GetDataManager()->WriteLog("%s to find uid:%s\n", __FUNCTION__, event->strUser.c_str());
+        globalToolManager->GetDataManager()->WriteLog("%s to find uid:%s\n", __FUNCTION__, event->strUser.toStdString().c_str());
         if (event->mStreamType < VHStreamType_Desktop)//远端非桌面共享、插播视频的普通流
         {
-            VhallRenderWdg *render = GetRenderWnd(QString::fromStdString(event->strUser));
+            VhallRenderWdg *render = GetRenderWnd(event->strUser);
             if (NULL == render)
             {
                 bool bIsCameraOpen = true;
                 bool bIsMicOpen = true;
                 bool bShowMain = false;
-                AppendRenderUser(QString::fromStdString(event->strUser), bIsMicOpen, bIsCameraOpen, bShowMain);
+                AppendRenderUser(event->strUser, bIsMicOpen, bIsCameraOpen, bShowMain);
             }
 
-            render = GetRenderWnd(QString::fromStdString(event->strUser));
+            render = GetRenderWnd(event->strUser);
 
             if (render) {
                 HWND wnd = render->GetRenderWndID();
@@ -2218,7 +2210,7 @@ void WebRtcLiveWdg::HandleSubScribSucEvent(QEvent* eventMsg)
                 render->show();
                 if (IsWindow(wnd)) {
                     globalToolManager->GetDataManager()->WriteLog("%s play remote camera\n", __FUNCTION__);
-                    globalToolManager->GetPaasSDK()->StartRenderStream(QString::fromStdString(event->strUser).toStdWString(), wnd, (vlive::VHStreamType)event->mStreamType);
+                    globalToolManager->GetPaasSDK()->StartRenderStream(event->strUser.toStdWString(), wnd, (vlive::VHStreamType)event->mStreamType);
                     if (event->mbHasVideo) {
                         if (render->GetUserCameraState()) {
                             render->SetEnableUpdateRendWnd(false);
@@ -2228,48 +2220,35 @@ void WebRtcLiveWdg::HandleSubScribSucEvent(QEvent* eventMsg)
                         }
                     }
                     if (mRenderMap.size() == 1) {
-                        SetMainWdgRenderCameraUser(QString::fromStdString(event->strUser));
+                        SetMainWdgRenderCameraUser(event->strUser);
                     }
                 }
                 else {
                }
-                globalToolManager->GetDataManager()->WriteLog("%s find:%s  to play\n", __FUNCTION__, event->strUser.c_str());
-                SetSpeakUserOffLine(QString::fromStdString(event->strUser), false);
+                globalToolManager->GetDataManager()->WriteLog("%s find:%s  to play\n", __FUNCTION__, event->strUser.toStdString().c_str());
+                SetSpeakUserOffLine(event->strUser, false);
             }
         }
         else if (event->mStreamType == VHStreamType_Desktop) {
 			//订阅到桌面共享流
-            //if (mDesktopWdg == NULL) {
-            //	mDesktopWdg = new QWidget(this);
-            //}
-            //if (mDesktopWdg) {
-            	//ui.verticalLayout_desktopAndMedia->addWidget(mDesktopWdg);
+            RecvRemoteMediaStream();
 			SetPlayDeskTopAndMediaFileState(true);
-				ui.DesktopWdg->show();
-            	HWND wnd = (HWND)(ui.DesktopWdg->winId());
-            	if (IsWindow(wnd)) {
-            		globalToolManager->GetDataManager()->WriteLog("%s play remote mDesktopWdg\n", __FUNCTION__);
-                    globalToolManager->GetPaasSDK()->StartRenderStream(QString::fromStdString(event->strUser).toStdWString(), wnd, (vlive::VHStreamType)event->mStreamType);
-            	}
-            	else {
-            	}
-				
-            //}
+			ui.DesktopWdg->show();
+            HWND wnd = (HWND)(ui.DesktopWdg->winId());
+            if (IsWindow(wnd)) {
+            	globalToolManager->GetDataManager()->WriteLog("%s play remote mDesktopWdg\n", __FUNCTION__);
+                globalToolManager->GetPaasSDK()->StartRenderStream(event->strUser.toStdWString(), wnd, (vlive::VHStreamType)event->mStreamType);
+            }
         }
         else if (event->mStreamType == VHStreamType_MediaFile) {
-            //if (mMediaFilePlayWdg == NULL) {
-            //	mMediaFilePlayWdg = new QWidget(this);
-            //}
-
-            //if (mMediaFilePlayWdg) {
-            	//ui.verticalLayout_desktopAndMedia->addWidget(mMediaFilePlayWdg);
+            RecvRemoteMediaStream();
 			SetPlayDeskTopAndMediaFileState(true);
             if (event->mbHasVideo) {
                 ui.MediaFilePlayWdg->show();
                 HWND wnd = (HWND)(ui.MediaFilePlayWdg->winId());
                 if (IsWindow(wnd)) {
                     globalToolManager->GetDataManager()->WriteLog("%s play remote mMediaFilePlayWdg\n", __FUNCTION__);
-                    globalToolManager->GetPaasSDK()->StartRenderStream(QString::fromStdString(event->strUser).toStdWString(), wnd, (vlive::VHStreamType)event->mStreamType);
+                    globalToolManager->GetPaasSDK()->StartRenderStream(event->strUser.toStdWString(), wnd, (vlive::VHStreamType)event->mStreamType);
                 }
             }
             else {
@@ -2528,11 +2507,7 @@ void WebRtcLiveWdg::SetPlayDeskTopAndMediaFileState(bool playing) {
             }
         }
         else {
-			//ui.bgWdg->show();
 			ui.widget_mainView->hide();
-			//ui.MediaFilePlayWdg->update();
-            //ui.widget_mainView->show();
-            //ui.widget_mainView->SetViewState(RenderView_NoJoin);
         }
     }
 }
@@ -2613,7 +2588,8 @@ void WebRtcLiveWdg::HandleGetDesktopStream(QEventStream* msgEvent)
 		this->hide();
 		QRect rect = QApplication::desktop()->availableGeometry();
 		if (m_pScreenShareToolWgd) {
-			m_pScreenShareToolWgd->SetHostUser(globalToolManager->GetDataManager()->GetPushStreamPermission());//怎么判断是否是主持
+			Permission per = globalToolManager->GetPaasSDK()->GetPermission();
+			m_pScreenShareToolWgd->SetHostUser(per.publish_inav_stream);//怎么判断是否是主持
 			m_pScreenShareToolWgd->move((rect.width() - m_pScreenShareToolWgd->width()) / 2, 0);
 			m_pScreenShareToolWgd->show();
 		}
@@ -2975,6 +2951,7 @@ void WebRtcLiveWdg::slot_PlayerVolumnChanged(int volume)
 
 void WebRtcLiveWdg::slot_OnClose()
 {
+	globalToolManager->GetDataManager()->WriteLog("%s", __FUNCDNAME__);
 	globalToolManager->GetPaasSDK()->LeaveVHMediaRoom();
 	globalToolManager->GetPaasSDK()->LogoutHVRoom();
 	m_bClose = true;
@@ -2986,18 +2963,10 @@ void WebRtcLiveWdg::slot_OnFresh() {
 
 void WebRtcLiveWdg::slot_OnFullSize() {
     if (mIsFullSize) {
-		QScreen *screen = QGuiApplication::primaryScreen();
-		QRect mm = screen->availableGeometry();
-        resize(1200, 700);
         showNormal();
         mIsFullSize = false;
-		move((mm.width()-1200)/2, (mm.height() - 700) / 2);
     }
     else {
-        QScreen *screen = QGuiApplication::primaryScreen();
-        QRect mm = screen->availableGeometry();
-        resize(mm.width(), mm.height());
-		move(0,0);
         showMaximized();
         mIsFullSize = true;
     }

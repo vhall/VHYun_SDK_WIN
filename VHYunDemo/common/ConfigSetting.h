@@ -70,6 +70,7 @@ public:
 #define KEY_VHALL_LIVE              "vhall_live"         //微吼直播
 #define KEY_VHALL_HELPER            "vhall_helper"
 #define KEY_VHALL_LOGO_HIDE         "vhall_logo_hide"    //微吼logo隐藏字段，获取的value=1 表示隐藏所有vhall_logo字样
+#define KEY_VHALL_USER_REGISTER_HIDE         "hide_user_register"    //登陆界面是否隐藏用户注册入口
 #define KEY_VHALL_APPUPDATE_ENABLE  "vhall_app_update_enable" //助手应用更新是否允许，获取的value=1 表示允许，其他不允许
 #define KEY_VHALL_HIDE_MEMBER_LIST  "vhall_hide_member_list"   //隐藏成员列表：1 隐藏、0显示
 #define KEY_VHALL_SHARE_LIVE_PIC    "vhall_share_pic_downloadurl"   //下载二维码生成地址
@@ -77,6 +78,7 @@ public:
 #define KEY_AUDIO_NOISEREDUCTION    "noisereduction"     //麦克风降噪
 #define KEY_AUDIO_MICGAIN           "micgain"            //麦克风增益
 #define KEY_VHALL_ShareURL         "vhallShareUrl"    //分享链接
+#define KEY_VHALL_BU                "bu"    //平台类型
 
 #define KEY_LOGREPORT_URL           "logReportUrl"       //日志上报路径
 //#define KEY_VIDEO_HIGHQUALITYCOD   "highQualityCod"    //高质量编码
@@ -95,6 +97,7 @@ public:
 //#define CONFIGPATH QString("./config.ini")
 #define CONFIGPATH L"config.ini"
 #define VHALL_TOOL_CONFIG   L"vhall_tool_config.ini"
+
 #define CONFIGPATH_DEVICE L"audiodevice.ini"
 
 #define KEY_URL_DOMAIN "domainUrl"

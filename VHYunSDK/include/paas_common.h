@@ -78,7 +78,7 @@ enum KickStream {
 class VHRoomMember {
 public:
     MemberStatus status;
-    std::string thirdPartyUserId;
+    std::wstring thirdPartyUserId;
 };
 
 class Permission {

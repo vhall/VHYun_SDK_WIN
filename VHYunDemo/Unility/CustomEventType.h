@@ -51,7 +51,7 @@ public:
 
 class QEventStream : public QEvent {
 public:
-    QEventStream(QEvent::Type type, std::string userid, std::string streamId, int mediaType, int iVhCapture, bool hasVideo = true, bool hasAudio = true) :
+    QEventStream(QEvent::Type type, QString userid, std::string streamId, int mediaType, int iVhCapture, bool hasVideo = true, bool hasAudio = true) :
         QEvent(type) {
         strUser = userid;
         strStream = streamId;
@@ -60,7 +60,7 @@ public:
         mbHasVideo = hasVideo;
         mbHasAudio = hasAudio;
     };
-    std::string strUser;
+    QString strUser;
     std::string strStream;
     int mStreamType;    
 	int mIVHCapture;//VHCapture
@@ -83,24 +83,24 @@ public:
 
 class QEventVHMember : public QEvent {
 public:
-    QEventVHMember(QEvent::Type type,std::string userid, int status = -1) :
+    QEventVHMember(QEvent::Type type, QString userid, int status = -1) :
         QEvent(type) {
         thirdPartyUserId = userid;
         memberStatusType = status;
     };
-    std::string thirdPartyUserId;
+    QString thirdPartyUserId;
     int memberStatusType;
 };
 
 class QEventUserPublish : public QEvent {
 public:
-    QEventUserPublish(QEvent::Type type, std::string userid, std::string stream_id, int status = -1) :
+    QEventUserPublish(QEvent::Type type, QString userid, std::string stream_id, int status = -1) :
         QEvent(type) {
         thirdPartyUserId = userid;
         strStreamId = stream_id;
         memberStatusType = status;
     };
-    std::string thirdPartyUserId;
+    QString thirdPartyUserId;
     std::string strStreamId;
     int memberStatusType;
 };
@@ -116,7 +116,7 @@ public:
 
 class QEventRoomEvent : public QEvent {
 public:
-    QEventRoomEvent(QEvent::Type type,int cbType, std::string userId = std::string(), int processType = 0, int respCode = 0, std::string resp = std::string()) :
+    QEventRoomEvent(QEvent::Type type,int cbType, QString userId = QString(), int processType = 0, int respCode = 0, std::string resp = std::string()) :
         QEvent(type) {
         mRespCode = respCode;
         mRespMsg = resp;
@@ -128,7 +128,7 @@ public:
     std::string mRespMsg;//请求响应信息
     int mCallBackCodeType;
     int mRespCode;
-    std::string mUserId;
+    QString mUserId;
     int mProcessType;
 };
 
@@ -144,11 +144,11 @@ public:
 
 class QEventPublishStream : public QEvent {
 public:
-    QEventPublishStream(QEvent::Type type, std::string msg) :
+    QEventPublishStream(QEvent::Type type, QString msg) :
         QEvent(type) {
         strStream = msg;
     };
-    std::string strStream;
+    QString strStream;
 };
 
 class CustomEventType : public QEvent {

@@ -27,8 +27,8 @@ public:
     virtual QString GetStartUrl() = 0;
     virtual QString GetInavInfoUrl() = 0;
 
-    virtual void SetPushStreamPermission(bool host) = 0;
-    virtual bool GetPushStreamPermission() = 0;
+    //virtual void SetPushStreamPermission(bool host) = 0;
+    //virtual bool GetPushStreamPermission() = 0;
 
 	virtual void SetIsLiving(bool bIsLiving = false) = 0;
 	virtual bool GetIsLiving() = 0;

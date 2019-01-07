@@ -66,7 +66,7 @@ public:
     *   online： true 用户上线/ false 用户下线
     *   user_id： 用户id
     */
-    virtual void OnUserOnLineState(bool online, const std::string user_id);
+    virtual void OnUserOnLineState(bool online, const std::wstring user_id);
 
 
     /*房间链接事件*/

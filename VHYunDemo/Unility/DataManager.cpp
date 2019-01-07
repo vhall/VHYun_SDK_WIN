@@ -84,13 +84,13 @@ void DataManager::SetLiveRoomId(QString roomId)
 	mStrLiveRoomId = roomId;
 }
 
-void DataManager::SetPushStreamPermission(bool host) {
-    mbIsHost = host;
-}
-
-bool DataManager::GetPushStreamPermission() {
-    return mbIsHost;
-}
+//void DataManager::SetPushStreamPermission(bool host) {
+//    mbIsHost = host;
+//}
+//
+//bool DataManager::GetPushStreamPermission() {
+//    return mbIsHost;
+//}
 
 void DataManager::SetIsLiving(bool bIsLiving /*= false*/) {
 	mbIsLiving = bIsLiving;

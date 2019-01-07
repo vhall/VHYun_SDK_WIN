@@ -61,7 +61,7 @@ private:
 	int AppendRenderUser(const QString& uid, /*const QString &role, const QString& nickName, */
 		const bool audio, const bool video, bool showInMainView, bool show = true);
 	VhallRenderWdg *GetRenderWnd(const QString& uid);
-
+    void RecvRemoteMediaStream();
 	//房间连接
     void HandleWebRtcRoomConnetSuc();
     void HandleWebRtcRoomConnetErr();

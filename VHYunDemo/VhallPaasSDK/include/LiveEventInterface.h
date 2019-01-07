@@ -41,6 +41,7 @@ public:
     virtual void OnStopPushStreamCallback(vlive::VHStreamType streamType,int code, const std::string& msg) = 0;
     /*
     *    接收到远端的媒体流  hasVideo ：是否包含视频
+    *    当接收到远端媒体流包括插播视频流或者桌面共享流，如果本地已经打开插播或桌面共享时自动停止。
     */
     virtual void OnReciveRemoteUserLiveStream(const std::wstring& user, const std::string& stream, const vlive::VHStreamType type, bool hasVideo, bool hasAudio) = 0;
     /*

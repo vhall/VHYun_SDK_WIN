@@ -7,7 +7,9 @@
 #include <string>
 
 #include "VH_ConstDeff.h"
-
+#include "VH_Error.h"
+#include "DebugTrace.h"
+#include "CRPluginDef.h"
 
 
 //#ifdef _DEBUG

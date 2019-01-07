@@ -1,4 +1,5 @@
 #include "VhallIALiveSettingDlg.h"
+#include "DebugTrace.h"
 #include "NoiseTooltip.h"
 #include "Pathmanager.h"
 #include "ConfigSetting.h"     

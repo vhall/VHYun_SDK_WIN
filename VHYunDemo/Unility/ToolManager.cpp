@@ -145,10 +145,10 @@ void ToolManager::OnRoomSuccessedEvent(RoomEvent roomEvent, std::string userData
     }
 
     if (roomEvent == RoomEvent_Login) {
-        PostEventToMainThread(new QEventRoomEvent(CustomEvent_Login, roomEvent, id.toStdString(), type));
+        PostEventToMainThread(new QEventRoomEvent(CustomEvent_Login, roomEvent, id, type));
     }
     else {
-        PostEventToMainThread(new QEventRoomEvent(CustomEvent_OnSuccessRoomEvent, roomEvent, id.toStdString(), type));
+        PostEventToMainThread(new QEventRoomEvent(CustomEvent_OnSuccessRoomEvent, roomEvent, id, type));
     }
 }
 
@@ -163,10 +163,10 @@ void ToolManager::OnRoomFailedEvent(RoomEvent roomEvent, int respCode, const std
     }
 
     if (roomEvent == RoomEvent_Login) {
-        PostEventToMainThread(new QEventRoomEvent(CustomEvent_LoginErr, roomEvent, id.toStdString(), type, respCode, msg));
+        PostEventToMainThread(new QEventRoomEvent(CustomEvent_LoginErr, roomEvent, id, type, respCode, msg));
     }
     else {
-        PostEventToMainThread(new QEventRoomEvent(CustomEvent_OnErrorRoomEvent, roomEvent, id.toStdString(), type, respCode, msg));
+        PostEventToMainThread(new QEventRoomEvent(CustomEvent_OnErrorRoomEvent, roomEvent, id, type, respCode, msg));
     }
 }
 
@@ -180,7 +180,7 @@ void ToolManager::OnGetVHRoomMembers(const std::string& msg, std::list<VHRoomMem
 	GetDataManager()->WriteLog("%s RoomMembers Count: %d", __FUNCTION__, members.size());
 	std::list<VHRoomMember>::iterator iter = members.begin();
     while (iter != members.end()){
-        PostEventToMainThread(new QEventVHMember(CustomEvent_GetVHMemberList,iter->thirdPartyUserId, iter->status));
+        PostEventToMainThread(new QEventVHMember(CustomEvent_GetVHMemberList,QString::fromStdWString(iter->thirdPartyUserId), iter->status));
         iter++;
     }
 }
@@ -194,41 +194,41 @@ void ToolManager::OnGetVHRoomKickOutMembers(std::list<VHRoomMember>& members) {
 	GetDataManager()->WriteLog("%s KickOutMembers Count: %d", __FUNCTION__, members.size());
 	std::list<VHRoomMember>::iterator iter = members.begin();
     while (iter != members.end()) {
-        PostEventToMainThread(new QEventVHMember(CustomEvent_GetVHKickOutMemberList,iter->thirdPartyUserId, iter->status));
+        PostEventToMainThread(new QEventVHMember(CustomEvent_GetVHKickOutMemberList, QString::fromStdWString(iter->thirdPartyUserId), iter->status));
         iter++;
     }
 }
 
 /*收到申请上麦消息 ,消息为广播消息，收到消息后，通过进入互动房间时获取的权限列表，判断用户是否有审核权限*/
 void ToolManager::OnRecvApplyInavPublishMsg(std::wstring& third_party_user_id) {
-    PostEventToMainThread(new QEventVHMember(CustomEvent_OnRecvApplyInavPublishMsg, QString::fromStdWString(third_party_user_id).toStdString()));
+    PostEventToMainThread(new QEventVHMember(CustomEvent_OnRecvApplyInavPublishMsg, QString::fromStdWString(third_party_user_id)));
 }
 
 /*收到审核上麦消息 ,消息为广播消息，收到同意上麦后执行上麦操作*/
 void ToolManager::OnRecvAuditInavPublishMsg(const std::wstring& third_party_user_id, AuditPublish event) {
 	if (GetDataManager()->GetThridPartyUserId().compare(QString::fromStdWString(third_party_user_id))==0 )
-		PostEventToMainThread(new QEventVHMember(CustomEvent_OnRecvAuditInavPublishMsg, QString::fromStdWString(third_party_user_id).toStdString(), event));
+		PostEventToMainThread(new QEventVHMember(CustomEvent_OnRecvAuditInavPublishMsg, QString::fromStdWString(third_party_user_id), event));
 }
 
 /*邀请上麦消息  消息为广播消息，收到消息后，提示邀请信息*/
 void ToolManager::OnRecvAskforInavPublishMsg(const std::wstring& third_party_user_id) {
 	if(GetDataManager()->GetThridPartyUserId().compare(QString::fromStdWString(third_party_user_id)) == 0)
-		PostEventToMainThread(new QEventPublishStream(CustomEvent_OnRecvAskforInavPublishMsg, QString::fromStdWString(third_party_user_id).toStdString()));
+		PostEventToMainThread(new QEventPublishStream(CustomEvent_OnRecvAskforInavPublishMsg, QString::fromStdWString(third_party_user_id)));
 }
 
 /*踢出流消息  消息为广播消息，收到消息后，执行踢出流*/
 void ToolManager::OnRecvKickInavStreamMsg(const std::wstring& third_party_user_id) {
-    PostEventToMainThread(new QEventPublishStream(CustomEvent_OnRecvKickInavStreamMsg, QString::fromStdWString(third_party_user_id).toStdString()));
+    PostEventToMainThread(new QEventPublishStream(CustomEvent_OnRecvKickInavStreamMsg, QString::fromStdWString(third_party_user_id)));
 }
 
 /*踢出互动房间 , 消息为广播消息，收到消息后，判断是当前用户后，执行踢出房间操作*/
 void ToolManager::OnRecvKickInavMsg(const std::wstring& third_party_user_id) {
-    PostEventToMainThread(new QEventPublishStream(CustomEvent_OnRecvKickInavMsg,QString::fromStdWString(third_party_user_id).toStdString()));
+    PostEventToMainThread(new QEventPublishStream(CustomEvent_OnRecvKickInavMsg,QString::fromStdWString(third_party_user_id)));
 }
 
 /*上/下/拒绝上麦消息 消息为广播消息*/
 void ToolManager::OnUserPublishCallback(const std::wstring& third_party_user_id, const std::string& stream_id, PushStreamEvent event) {
-    PostEventToMainThread(new QEventUserPublish(CustomEvent_OnUserPublishCallback, QString::fromStdWString(third_party_user_id).toStdString(), stream_id, event));
+    PostEventToMainThread(new QEventUserPublish(CustomEvent_OnUserPublishCallback, QString::fromStdWString(third_party_user_id), stream_id, event));
 }
 
 /*互动房间关闭消息  接受到该消息后，所有在互动房间的人员，全部下麦，退出房间*/
@@ -236,9 +236,9 @@ void ToolManager::OnRecvInavCloseMsg() {
     PostEventToMainThread(new QEvent(CustomEvent_OnRecvInavCloseMsg));
 }
 
-void ToolManager::OnUserOnLineState(bool online, const std::string user_id) {
+void ToolManager::OnUserOnLineState(bool online, const std::wstring user_id) {
     int state = online == true ? 1 : 0;
-    PostEventToMainThread(new QEventVHMember(CustomEvent_User_OnLine, user_id, state));
+    PostEventToMainThread(new QEventVHMember(CustomEvent_User_OnLine, QString::fromStdWString(user_id), state));
 }
 
 /*房间链接事件*/
@@ -331,7 +331,7 @@ void ToolManager::OnUserOnLineState(bool online, const std::string user_id) {
 
 		 //QString join_uid = QString::number(mLocalStream->mId);
 		 //TRACE6("%s  mLocalStream ACCESS_ACCEPTED\n", __FUNCTION__);
-		 QCoreApplication::postEvent(pRtcLiveWdg, new QEventStream(CustomEvent_SubScribSuc, QString::fromStdWString(user).toStdString(), stream, type, hasVideo, hasAudio));
+		 QCoreApplication::postEvent(pRtcLiveWdg, new QEventStream(CustomEvent_SubScribSuc, QString::fromStdWString(user), stream, type, hasVideo, hasAudio));
 	 }
  }
 
@@ -343,7 +343,7 @@ void ToolManager::OnUserOnLineState(bool online, const std::string user_id) {
 
 		 //QString join_uid = QString::number(mLocalStream->mId);
 		 //TRACE6("%s  mLocalStream ACCESS_ACCEPTED\n", __FUNCTION__);
-		 QCoreApplication::postEvent(pRtcLiveWdg, new QEventStream(CustomEvent_STREAM_REMOVED, QString::fromStdWString(user).toStdString(), stream, type, 0));
+		 QCoreApplication::postEvent(pRtcLiveWdg, new QEventStream(CustomEvent_STREAM_REMOVED, QString::fromStdWString(user), stream, type, 0));
 	 }
 
  }

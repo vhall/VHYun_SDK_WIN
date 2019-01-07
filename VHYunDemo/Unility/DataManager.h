@@ -37,8 +37,8 @@ public:
 	virtual QString GetLiveRoomId();
 	virtual void SetLiveRoomId(QString roomId);
 
-    virtual void SetPushStreamPermission(bool host);
-    virtual bool GetPushStreamPermission();
+    //virtual void SetPushStreamPermission(bool host);
+    //virtual bool GetPushStreamPermission();
 
 	virtual void SetIsLiving(bool bIsLiving = false);
 	virtual bool GetIsLiving();
@@ -55,7 +55,7 @@ private:
 	QMutex mStreamMutexCS;
 
 
-    std::atomic_bool mbIsHost = false;
+    //std::atomic_bool mbIsHost = false;
     std::atomic_bool mbIsLiving = false;
 
 };
