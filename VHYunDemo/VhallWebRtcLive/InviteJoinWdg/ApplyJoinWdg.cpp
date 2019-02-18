@@ -13,7 +13,7 @@ ApplyJoinWdg::ApplyJoinWdg(QWidget *parent)
 {
     ui.setupUi(this);
     mnMaxTimeOut = MAX_TIME_OUT;
-    setWindowFlags(Qt::FramelessWindowHint | Qt::Window);
+    setWindowFlags(Qt::FramelessWindowHint | Qt::Window | Qt::WindowStaysOnTopHint);
     setAttribute(Qt::WA_TranslucentBackground);
     setAutoFillBackground(false);
 
@@ -97,6 +97,7 @@ void ApplyJoinWdg::Slot_HostAgreeApply() {
     globalToolManager->GetDataManager()->WriteLog("%s AuditPublish::AuditPublish_Accept user id:%s", __FUNCTION__, mStrUid.toStdWString().c_str());
     globalToolManager->GetPaasSDK()->AuditInavPublish(mStrUid.toStdString(),AuditPublish::AuditPublish_Accept);
     globalToolManager->PostEventToMainThread(new QEventDestoryWnd(CustomEvent_DestoryWnd, WND_ID_ASK_FOR_SPEAK + mStrUid));
+	this->hide();
 }
 
 void ApplyJoinWdg::Slot_HostRefuseApply() {
@@ -106,6 +107,7 @@ void ApplyJoinWdg::Slot_HostRefuseApply() {
     globalToolManager->GetDataManager()->WriteLog("%s AuditPublish::AuditPublish_Refused user id:%s", __FUNCTION__, mStrUid.toStdWString().c_str());
     globalToolManager->GetPaasSDK()->AuditInavPublish(mStrUid.toStdString(), AuditPublish::AuditPublish_Refused);
     globalToolManager->PostEventToMainThread(new QEventDestoryWnd(CustomEvent_DestoryWnd, WND_ID_ASK_FOR_SPEAK + mStrUid));
+	this->hide();
 }
 
 void ApplyJoinWdg::paintEvent(QPaintEvent *){
@@ -131,6 +133,7 @@ bool ApplyJoinWdg::eventFilter(QObject *o, QEvent *e) {
 
 void ApplyJoinWdg::Slot_ShowTimeOut() {
    if (nTimeCount == 0) {
+	   hide();
       emit Slot_HostRefuseApply();
       m_pTimer->stop();
    } else {

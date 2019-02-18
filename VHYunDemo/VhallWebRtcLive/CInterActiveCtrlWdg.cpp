@@ -1,6 +1,9 @@
 #include "CInterActiveCtrlWdg.h"
 //#include "CameraMgrUI.h"
+#include "../Unility/Unility.h"
+#include <QTimer> 
 
+extern ToolManager *globalToolManager;
 
 #define TO_SPEAK "QPushButton{color:rgb(255, 247, 247);border-image:url(:/sysButton/img/sysButton/okButton.png);}QPushButton:hover{border-image:url(:/sysButton/img/sysButton/okButtonOn.png);}QPushButton:pressed{border-image:url(:/sysButton/img/sysButton/okButton.png);}"
 
@@ -8,8 +11,6 @@
 QPushButton:hover{border-image:url(:/interactivity/offSpeake);}\
 QPushButton:pressed{border-image:url(:/interactivity/offSpeakeHover);}\
 QPushButton:disabled{border-image: url(:/interactivity/offSpeakeHover);}"
-
-
 
 CInterActiveCtrlWdg::CInterActiveCtrlWdg(QWidget *parent)
 : QWidget(parent){
@@ -20,7 +21,8 @@ CInterActiveCtrlWdg::CInterActiveCtrlWdg(QWidget *parent)
    DisMouseTracking(); 
    ui.pushButton_cameraList->hide();
    ui.label->hide();
-  
+   mpTimer = new QTimer;
+   connect(mpTimer, &QTimer::timeout, this, &CInterActiveCtrlWdg::slotEnabelStartLive);
 }
 
 CInterActiveCtrlWdg::~CInterActiveCtrlWdg() {
@@ -223,6 +225,7 @@ void CInterActiveCtrlWdg::initToSpeakBtnState(bool toSpeak)
 {
 	if (toSpeak) {
 		ui.pushButton_toSpeak->show();
+		ui.pushButton_startLive->hide();
 	}
 	else {
 		ui.pushButton_toSpeak->hide();
@@ -230,7 +233,7 @@ void CInterActiveCtrlWdg::initToSpeakBtnState(bool toSpeak)
 }
 
 void CInterActiveCtrlWdg::SetToSpeakBtnState(bool toSpeak) {
-	if (toSpeak) {
+	if (toSpeak) {//true  ÉÏÂó
 		ui.pushButton_toSpeak->hide();
 		ui.pushButton_startLive->show();
 	}
@@ -277,7 +280,11 @@ void CInterActiveCtrlWdg::OnStartLive(bool start) {
    } else {
        emit SigStopLive();
        ui.pushButton_startLive->setText(QStringLiteral("ÉÏÂó"));
+	   globalToolManager->GetDataManager()->SetIsLiving(false);
    }
+   ui.pushButton_startLive->setEnabled(false);
+   globalToolManager->GetPaasSDK()->ReFreshPermission();
+   ui.pushButton_startLive->setEnabled(true);
 }
 
 void CInterActiveCtrlWdg::Slot_OnClickedCameraCtrlBtn() {
@@ -298,10 +305,20 @@ void CInterActiveCtrlWdg::Slot_OnClickedPlayerCtrlBtn() {
 }
 
 void CInterActiveCtrlWdg::Slot_OnClickedScreenShareCtrlBtn() {
+
    emit Sig_OnClickedScreenShareCtrlBtn();
+
+}
+
+void CInterActiveCtrlWdg::slotEnabelStartLive(){
+	mpTimer->stop();
+	ui.pushButton_startLive->setEnabled(true);
 }
 
 void CInterActiveCtrlWdg::Slot_OnClickedStartLiveCtrlBtn() {
+	ui.pushButton_startLive->setEnabled(false);
+	//ui.pushButton_startLive->setEnabled(false);
+	mpTimer->start(3000);
    emit Sig_OnClickedStartLiveCtrlBtn();
 }
 

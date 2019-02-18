@@ -113,7 +113,7 @@ WebRtcLiveWdg::WebRtcLiveWdg(QWidget *parent) :
 	//ui.widget_ctrl->initToSpeakBtnState(per.apply_inav_publish);//申请上麦
 	ui.widget_ctrl->ShowPublishInavAnother(per.publish_inav_another);//旁路直播
 	ui.widget_ctrl->intShowStartLive(per.publish_inav_stream);//推流 /上麦
-	ui.widget_ctrl->SetToSpeakBtnState(!per.apply_inav_publish);//申请上麦
+	ui.widget_ctrl->initToSpeakBtnState(per.apply_inav_publish);//申请上麦
 
     ui.widget_mainView->ShowSetKickOutBtn(false);
     ui.widget_mainView->ShowSetSpeakBtn(false);
@@ -275,7 +275,10 @@ void WebRtcLiveWdg::HandleRecvAuditInavPublishMsg(QEvent* event)
         if (AuditPublish::AuditPublish_Accept == eventMsg->memberStatusType)//开始推流
         {
             globalToolManager->GetDataManager()->WriteLog("%s AuditPublish::AuditPublish_Accept", __FUNCTION__);
-            globalToolManager->GetPaasSDK()->StartPushLocalStream();
+            //globalToolManager->GetPaasSDK()->StartPushLocalStream();
+			int iStat = 0;
+			StartPushStream(iStat);
+
             QString tips = QStringLiteral("上麦申请已同意");
             FadeOutTip(tips);
 			ui.widget_ctrl->OnStartLive(true);
@@ -405,7 +408,8 @@ void WebRtcLiveWdg::HandleStreamRemoved(QEvent* event)
         {
             RemoveLocalStreamMsg(eventMsg->strUser);
         }
-        else if (eventMsg->mStreamType == VHStreamType_MediaFile)
+        else if (eventMsg->mStreamType == VHStreamType_MediaFile 
+			&& globalToolManager->GetDataManager()->GetThridPartyUserId().compare(eventMsg->strUser)!=0  )//且不是本人的
         {
             RemoveMediaFileStreamMsg(eventMsg->strUser);
         }
@@ -675,6 +679,12 @@ void WebRtcLiveWdg::customEvent(QEvent *event) {
 			ui.widget_ctrl->SetToSpeakBtnState(!per.apply_inav_publish);//申请上麦
 
 			HandleStopLiving();
+
+			VHRoomMemberWdg* member = GetRoomMemberFromOnLineList(globalToolManager->GetDataManager()->GetThridPartyUserId());
+			if (member) {
+					member->SetUserStatus(MemberStatus_Watching);
+			}
+
 		}
 	}
         break;
@@ -797,7 +807,9 @@ void WebRtcLiveWdg::slot_showMemberList() {
 }
 
 void WebRtcLiveWdg::slot_RePublishLocalStreamTimeout() {
-    int nRet = globalToolManager->GetPaasSDK()->StartPushLocalStream();
+	
+    int nRet = VhallLive_OK/* = globalToolManager->GetPaasSDK()->StartPushLocalStream()*/;
+	StartPushStream(nRet);
     if (nRet == VhallLive_ROOM_DISCONNECT) {
         //网络连接异常，启动定时器尝试重新推流。
         mRePublishLocalStreamTimer.start(3000);
@@ -1092,7 +1104,7 @@ void WebRtcLiveWdg::slot_BtnStreamClicked() {
 	{
 		m_pScreenShareToolWgd->EnableStartLive(true);
 	}
-    if (!globalToolManager->GetDataManager()->GetIsLiving()) { //开播
+    if (!globalToolManager->GetDataManager()->GetIsLiving()) { //主播判断未开播，嘉宾判断未上麦
 		mbStopLive = false;
         ui.widget_ctrl->EnableStartLive(false);
 		if (m_pScreenShareToolWgd)
@@ -1115,17 +1127,17 @@ void WebRtcLiveWdg::slot_BtnStreamClicked() {
                 wndLoading->Notice(mapParam);
                 wndLoading->exec();
             }
-
             return;
         }
         globalToolManager->GetDataManager()->WriteLog("VhallInteractive::Slot_BtnStreamClicked() StartPushStream\n");
+
         HandleStartLiving();
     }
     else {
 		mbStopLive = true;
-        if (!globalToolManager->GetPaasSDK()->IsCapturingStream(VHStreamType_AVCapture) &&
-            !globalToolManager->GetPaasSDK()->IsCapturingStream(VHStreamType_Desktop) &&
-            !globalToolManager->GetPaasSDK()->IsCapturingStream(VHStreamType_MediaFile)) {
+        if (!globalToolManager->GetPaasSDK()->IsPushingStream(VHStreamType_AVCapture) &&
+            !globalToolManager->GetPaasSDK()->IsPushingStream(VHStreamType_Desktop) &&
+            !globalToolManager->GetPaasSDK()->IsPushingStream(VHStreamType_MediaFile)) {
             globalToolManager->GetPaasSDK()->UserPublishCallback(PushStreamEvent::PushStreamEvent_Lower);
         }
         else {
@@ -1138,28 +1150,30 @@ void WebRtcLiveWdg::slot_BtnStreamClicked() {
 void WebRtcLiveWdg::HandleStopLiving()
 {
     globalToolManager->GetDataManager()->WriteLog("VhallInteractive::HandleStopLiving() start\n");
-    RemoveAllRender();
-    ResetPlayMediaFileAndDesktopShare();
+	StopAllRenderStream();
+    //ResetPlayMediaFileAndDesktopShare();
     globalToolManager->GetDataManager()->WriteLog("VhallInteractive::HandleStopLiving() end\n");
 }
 
-void WebRtcLiveWdg::ResetPlayMediaFileAndDesktopShare() {
-    globalToolManager->GetPaasSDK()->StopPushMediaFileStream();
-    globalToolManager->GetPaasSDK()->StopPushDesktopStream();
-}
+//void WebRtcLiveWdg::ResetPlayMediaFileAndDesktopShare() {
+//	globalToolManager->GetPaasSDK()->StopPushMediaFileStream();
+//	globalToolManager->GetPaasSDK()->StopPushDesktopStream();
+//}
 
 void WebRtcLiveWdg::StopAllRenderStream() {
     QMutexLocker l(&mStreamMutexCS);
     globalToolManager->GetPaasSDK()->StopPushLocalStream();
-	globalToolManager->GetPaasSDK()->StopDesktopCapture();
-	globalToolManager->GetPaasSDK()->StopMediaFileCapture();
+	//globalToolManager->GetPaasSDK()->StopDesktopCapture();
+	//globalToolManager->GetPaasSDK()->StopMediaFileCapture();
+	globalToolManager->GetPaasSDK()->StopPushMediaFileStream();
+	globalToolManager->GetPaasSDK()->StopPushDesktopStream();
 }
 
-void WebRtcLiveWdg::RemoveAllRender() {
-    globalToolManager->GetDataManager()->WriteLog("%s enter\n", __FUNCTION__);
-    StopAllRenderStream();
-    globalToolManager->GetDataManager()->WriteLog("%s  end\n", __FUNCTION__);
-}
+//void WebRtcLiveWdg::RemoveAllRender() {
+//    globalToolManager->GetDataManager()->WriteLog("%s enter\n", __FUNCTION__);
+//    StopAllRenderStream();
+//    globalToolManager->GetDataManager()->WriteLog("%s  end\n", __FUNCTION__);
+//}
 
 
 void WebRtcLiveWdg::StopPlayFile()
@@ -1932,22 +1946,30 @@ void WebRtcLiveWdg::HandleSuccessEventRoomEvent(QEvent* event) {
     }
 }
 
+bool WebRtcLiveWdg::StartPushStream(int & iState)
+{
+	bool bRef = false;
+	if (globalToolManager->GetPaasSDK()->IsCapturingStream(VHStreamType_AVCapture)) {
+		iState = globalToolManager->GetPaasSDK()->StartPushLocalStream();
+		bRef = true;
+	}
+
+	if (globalToolManager->GetPaasSDK()->IsCapturingStream(VHStreamType_Desktop)) {
+		globalToolManager->GetPaasSDK()->StartPushDesktopStream();
+		bRef = true;
+	}
+	else if (globalToolManager->GetPaasSDK()->IsCapturingStream(VHStreamType_MediaFile)) {
+		globalToolManager->GetPaasSDK()->StartPushMediaFileStream();
+		bRef = true;
+	}
+	return bRef;
+}
 
 void WebRtcLiveWdg::HandleStartLiving() {
 	bool bRef = false;
     //开始推流
-    if (globalToolManager->GetPaasSDK()->IsCapturingStream(VHStreamType_AVCapture)) {
-        globalToolManager->GetPaasSDK()->StartPushLocalStream();
-		bRef = true;
-    }
-    if (globalToolManager->GetPaasSDK()->IsCapturingStream(VHStreamType_Desktop)){
-        globalToolManager->GetPaasSDK()->StartPushDesktopStream();
-		bRef = true;
-    }
-    if (globalToolManager->GetPaasSDK()->IsCapturingStream(VHStreamType_MediaFile)){
-        globalToolManager->GetPaasSDK()->StartPushMediaFileStream();
-		bRef = true;
-    }
+	int iStat = 0;
+	bRef = StartPushStream(iStat);
 
 	if (!bRef)
 	{
@@ -2543,6 +2565,7 @@ void WebRtcLiveWdg::HandleGetLocalStream(QEventStream* msgEvent)
                 if (globalToolManager->GetDataManager()->GetIsLiving())
                 {
                     globalToolManager->GetPaasSDK()->StartPushLocalStream();
+					//StartPushStream();
                 }
                 
                 SetMainWdgRenderCameraUser(user_id);

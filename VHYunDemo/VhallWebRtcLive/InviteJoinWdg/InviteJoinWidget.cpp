@@ -14,7 +14,7 @@ InviteJoinWidget::InviteJoinWidget(QWidget *parent)
 {
     ui.setupUi(this);
     mnMaxTimeOut = MAX_TIME_OUT;
-    setWindowFlags(Qt::FramelessWindowHint | Qt::Window);
+    setWindowFlags(Qt::FramelessWindowHint | Qt::Window | Qt::WindowStaysOnTopHint);
     setAttribute(Qt::WA_TranslucentBackground);
     setAutoFillBackground(false);
 
@@ -99,8 +99,19 @@ void InviteJoinWidget::Slot_GuestAgreeHostInvite() {
     //emit Sig_GuestAgreeHostInvite();
     //同意上麦需要推流之后发送。
     globalToolManager->GetDataManager()->WriteLog("%s StartPushLocalStream user id:%s", __FUNCTION__, mStrUid.toStdWString().c_str());
+
     globalToolManager->GetPaasSDK()->StartPushLocalStream();
+
+	if (globalToolManager->GetPaasSDK()->IsCapturingStream(VHStreamType_Desktop)) {//如果桌面共享采集中
+		globalToolManager->GetPaasSDK()->StartPushDesktopStream();
+	}
+	else if (globalToolManager->GetPaasSDK()->IsCapturingStream(VHStreamType_MediaFile)) {//如果视频插播中
+		globalToolManager->GetPaasSDK()->StartPushMediaFileStream();
+	}
+	
+
     globalToolManager->GetWndManager()->DestoryWnd(WND_ID_INVITE_TO_SPEAK + mStrUid);
+	hide();
 }
 
 void InviteJoinWidget::Slot_GuestRefuseHostInvite() {
@@ -112,7 +123,7 @@ void InviteJoinWidget::Slot_GuestRefuseHostInvite() {
     globalToolManager->GetDataManager()->WriteLog("%s PushStreamEvent_Refused user id:%s", __FUNCTION__, mStrUid.toStdWString().c_str());
     globalToolManager->GetPaasSDK()->UserPublishCallback(PushStreamEvent_Refused);
     globalToolManager->GetWndManager()->DestoryWnd(WND_ID_INVITE_TO_SPEAK + mStrUid);
-
+	hide();
 }
 void InviteJoinWidget::paintEvent(QPaintEvent *){
    QPainter painter(this);
@@ -137,6 +148,7 @@ bool InviteJoinWidget::eventFilter(QObject *o, QEvent *e) {
 
 void InviteJoinWidget::Slot_ShowTimeOut() {
    if (nTimeCount == 0) {
+	   hide();
       emit Sig_GuestRefuseHostInvite();
       m_pTimer->stop();
    } else {

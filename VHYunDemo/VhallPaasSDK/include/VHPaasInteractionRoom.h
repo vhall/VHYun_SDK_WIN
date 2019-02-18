@@ -406,6 +406,10 @@ public:
     *   返回值：播放状态  MEDIA_FILE_PLAY_STATE
     */
     virtual int MediaGetPlayerState() = 0;
+	/*
+*   接口说明：重新获取当前账号权限
+*/
+	virtual void ReFreshPermission() = 0;
 };
 
 VHPAASSDK_EXPORT VHPaasInteractionRoom* GetPaasSDKInstance();

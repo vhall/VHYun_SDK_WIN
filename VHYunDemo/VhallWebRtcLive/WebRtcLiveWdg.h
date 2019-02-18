@@ -86,6 +86,7 @@ private:
     void HandleSuccessEventRoomEvent(QEvent* event);
 	void HandleSubScribSucEvent(QEvent* event);
 	void HandleStartLiving();
+	
 	void HandleGetStream(QEvent* event);
 	void HandleGetLocalStream(QEventStream* msgEvent);
 	void HandleGetDesktopStream(QEventStream* msgEvent);
@@ -121,7 +122,7 @@ private:
     void HandleKickInavStream(QEventRoomEvent* roomEvent, bool sucessed);
     void HandleAuditInavPublish(QEventRoomEvent* roomEvent, bool sucessed);
     void HandleKickInva(QEventRoomEvent* roomEvent, bool sucessed);
-	void RemoveAllRender();
+	//void RemoveAllRender();
 	void StopAllRenderStream();
 	
 	//控制打开桌面共享页面
@@ -196,6 +197,7 @@ private slots:
 	void on_pushButton_nextView_clicked(bool checked = false);
 	void slot_move(QPoint point);
 private:
+	bool StartPushStream(int & iLocalState);
 	void RemoveMediaFileStreamMsg(const QString& uid);
 	void RemoveDesktopStreamMsg(const QString& uid);
 	void RemoveLocalStreamMsg(const QString& uid);
@@ -220,7 +222,7 @@ private:
     void SetMainWdgRenderCameraUser(const QString& user_id);
     void SetPlayDeskTopAndMediaFileState(bool playing);
 
-	void ResetPlayMediaFileAndDesktopShare();
+	//void ResetPlayMediaFileAndDesktopShare();
 	int GetPlayFileState(signed long long& n64Pos, signed long long& n64MaxPos);
 	void StopShowMediaVideo();
 

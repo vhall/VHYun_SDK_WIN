@@ -6,6 +6,7 @@
 #include "vlive_def.h"
 
 class CameraMgrUI;
+class QTimer;
 
 class CInterActiveCtrlWdg : public QWidget {
    Q_OBJECT
@@ -22,6 +23,7 @@ public:
    void intShowStartLive(bool bShow);
    void initToSpeakBtnState(bool toSpeak);
    void SetToSpeakBtnState(bool toSpeak);
+
    void OnOpenCamera(bool bOpen);
    void OnOpenMic(bool bOpen);
    void OnOpenPlayer(bool bOpen);
@@ -86,6 +88,7 @@ protected:
    void EnableMouseTracking();   
 
 private slots:
+	void slotEnabelStartLive();
 	//void slotToSpeakClicked();
 	void Slot_OnClickedCameraCtrlBtn();
 	void Slot_OnClickedMicCtrlBtn();
@@ -114,6 +117,7 @@ private:
 
    //bool m_bToSpeakState = true;
   //CameraMgrUI* m_pCameraMgrUI = NULL;              //摄像头列表界面
+   QTimer* mpTimer;
 };
 
 #endif // CINTERACTIVECTRLWDG_H
